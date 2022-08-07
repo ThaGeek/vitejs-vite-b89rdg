@@ -1,31 +1,29 @@
 import { useState } from 'react';
 import './App.css';
 
-import { useForm, FormProvider } from 'react-hook-form';
 import View from './View';
-import { MultiStepFormProvider } from './context/MultiStepFormContext';
-function App() {
+import {
+  FormState,
+  MultiStepFormProvider,
+} from './context/MultiStepFormContext';
+
+type Steps = 'location' | 'personalInfo';
+
+const getInitialState = (): FormState<Steps> => {
   let formState = window.localStorage.getItem('formState');
 
   if (formState) {
-    formState = JSON.parse(formState);
+    return JSON.parse(formState);
   }
-
-  console.log('formState from localStorage', formState);
+  return {
+    currentStep: 'location',
+    formData: {},
+  };
+};
+function App() {
+  console.log('formState from localStorage', getInitialState());
   return (
-    <MultiStepFormProvider
-      steps={['location', 'personalInfo']}
-      initialState={
-        formState ?? {
-          currentStep: 'location',
-          formData: {
-            location: {
-              location: 'test',
-            },
-          },
-        }
-      }
-    >
+    <MultiStepFormProvider<Steps> initialState={getInitialState()}>
       <View />
     </MultiStepFormProvider>
   );

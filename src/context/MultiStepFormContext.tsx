@@ -1,24 +1,5 @@
 import { createContext, useReducer } from 'react';
 
-type ProviderProps<T extends string> = {
-  children: React.ReactNode;
-  steps: T[];
-  initialState: {
-    currentStep: { [P in keyof T]: T[P] };
-    formData: {
-      [key in keyof T]?: object;
-    };
-  };
-};
-
-export type FormDataProps<T extends string> =
-  ProviderProps<T>['initialState']['formData'];
-
-type FormState<T> = {
-  currentStep: T;
-  formData: object;
-};
-
 type Action =
   | { type: 'SET_CURRENT_STEP'; payload: string }
   | {
@@ -28,6 +9,18 @@ type Action =
         data: object;
       };
     };
+
+interface ProviderProps<T extends string> extends FormState<T> {
+  children: React.ReactNode;
+  initialState: FormState<T>;
+}
+
+export type FormState<T extends string> = {
+  currentStep: T;
+  formData: {
+    [key in T]?: object;
+  };
+};
 
 const defaultState = {
   currentStep: 'default',
@@ -40,7 +33,7 @@ const MultiStepFormContext = createContext({
   setStepData: ({ step, formData }: { step: string; formData: object }) => {},
 });
 
-const reducer = <T, _>(state: FormState<T>, action: Action) => {
+const reducer = <T extends string, _>(state: FormState<T>, action: Action) => {
   switch (action.type) {
     case 'SET_CURRENT_STEP':
       localStorage.setItem(
@@ -71,9 +64,8 @@ const reducer = <T, _>(state: FormState<T>, action: Action) => {
   }
 };
 
-export const MultiStepFormProvider = <T extends string, _>({
+export const MultiStepFormProvider = <T extends string>({
   children,
-  steps,
   initialState,
 }: ProviderProps<T>) => {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -81,8 +73,8 @@ export const MultiStepFormProvider = <T extends string, _>({
   return (
     <MultiStepFormContext.Provider
       value={{
-        currentStep: state.currentStep as T,
-        formData: state.formData as FormDataProps<T>,
+        currentStep: state.currentStep,
+        formData: state.formData,
         setCurrentStep: (step: string) =>
           dispatch({ type: 'SET_CURRENT_STEP', payload: step }),
 

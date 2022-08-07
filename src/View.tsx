@@ -5,7 +5,6 @@ import PersonalInformationStep from './steps/PersonalInformationStep';
 const View = () => {
   const { currentStep, formData, ...context } =
     useContext(MultiStepFormContext);
-  console.log('formData', formData);
   return (
     <>
       {currentStep === 'location' && (
